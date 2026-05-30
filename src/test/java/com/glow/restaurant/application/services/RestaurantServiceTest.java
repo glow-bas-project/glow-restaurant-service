@@ -104,6 +104,56 @@ public class RestaurantServiceTest {
     }
 
     @Test
+    public void findRestaurants_filtersBySearchTerm() {
+        // given
+        var restaurant = Restaurant.builder()
+            .name("Glow Kitchen")
+            .phoneNumber("+45 12 34 56 78")
+            .address(new Address("1 Main St", "Copenhagen", "Denmark", 0.0, 0.0))
+            .openingHours(createHours())
+            .build();
+        var dto = new RestaurantDto(
+            restaurant.getId().toString(),
+            restaurant.getName(),
+            restaurant.getPhoneNumber(),
+            restaurant.getAddress(),
+            restaurant.getOpeningHours());
+        when(restaurantRepository.findAllRestaurants()).thenReturn(List.of(restaurant));
+        when(mapper.toDto(restaurant)).thenReturn(dto);
+
+        // when
+        var actual = service.findRestaurants("kitchen");
+
+        // then
+        assertEquals(List.of(dto), actual);
+    }
+
+    @Test
+    public void findRestaurants_returnsAllWhenSearchIsBlank() {
+        // given
+        var restaurant = Restaurant.builder()
+            .name("Glow Kitchen")
+            .phoneNumber("+45 12 34 56 78")
+            .address(createAddress())
+            .openingHours(createHours())
+            .build();
+        var dto = new RestaurantDto(
+            restaurant.getId().toString(),
+            restaurant.getName(),
+            restaurant.getPhoneNumber(),
+            restaurant.getAddress(),
+            restaurant.getOpeningHours());
+        when(restaurantRepository.findAllRestaurants()).thenReturn(List.of(restaurant));
+        when(mapper.toDto(restaurant)).thenReturn(dto);
+
+        // when
+        var actual = service.findRestaurants("   ");
+
+        // then
+        assertEquals(List.of(dto), actual);
+    }
+
+    @Test
     public void findRestaurantIds_delegatesToRepository() {
         // given
         var pageResult = new PageResult<>(List.of(UUID.randomUUID().toString()), 1, true);

@@ -12,7 +12,7 @@ import org.jboss.resteasy.reactive.RestResponse;
 
 import java.util.List;
 
-@Path("/")
+@Path("/restaurants")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class RestaurantController {
@@ -21,6 +21,11 @@ public class RestaurantController {
 
     public RestaurantController(RestaurantService service) {
         this.service = service;
+    }
+
+    @GET
+    public RestResponse<List<RestaurantDto>> getRestaurants(@QueryParam("search") String search) {
+        return RestResponse.ok(service.findRestaurants(search));
     }
 
     @POST

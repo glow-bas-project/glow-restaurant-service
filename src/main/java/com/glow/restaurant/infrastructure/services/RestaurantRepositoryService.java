@@ -38,6 +38,13 @@ public class RestaurantRepositoryService implements RestaurantRepository {
     }
 
     @Override
+    public List<Restaurant> findAllRestaurants() {
+        return repository.listAll().stream()
+            .map(mapper::toDomain)
+            .toList();
+    }
+
+    @Override
     public PageResult<String> findIds(PageRequest pageRequest) {
         var result = repository.findIds(pageRequest);
 

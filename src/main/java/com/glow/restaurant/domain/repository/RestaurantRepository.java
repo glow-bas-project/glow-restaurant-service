@@ -12,6 +12,7 @@ public interface RestaurantRepository {
     void save(Restaurant restaurant);
 
     Optional<Restaurant> findById(String id);
+    List<Restaurant> findAllRestaurants();
     PageResult<String> findIds(PageRequest pageRequest);
     List<Restaurant> findByIds(List<String> ids);
 

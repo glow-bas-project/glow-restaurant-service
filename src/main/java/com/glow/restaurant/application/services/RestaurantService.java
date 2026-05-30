@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Locale;
 
 @ApplicationScoped
 public class RestaurantService {
@@ -46,6 +47,13 @@ public class RestaurantService {
                 .orElseThrow(() -> new NotFoundException("Restaurant with id " + id + " not found")));
     }
 
+    public List<RestaurantDto> findRestaurants(String search) {
+        return restaurantRepository.findAllRestaurants().stream()
+            .filter(restaurant -> matchesSearch(restaurant, search))
+            .map(mapper::toDto)
+            .toList();
+    }
+
     public PageResult<String> findRestaurantIds(int size, int page) {
         // TODO: Build some defaults but for now this is fine
         return restaurantRepository.findIds(new PageRequest(size, page));
@@ -59,5 +67,22 @@ public class RestaurantService {
 
     public boolean deleteRestaurantById(String id) {
         return restaurantRepository.deleteById(id);
+    }
+
+    private static boolean matchesSearch(Restaurant restaurant, String search) {
+        if (search == null || search.isBlank()) {
+            return true;
+        }
+
+        String needle = search.toLowerCase(Locale.ROOT);
+        return containsIgnoreCase(restaurant.getName(), needle)
+            || containsIgnoreCase(restaurant.getPhoneNumber(), needle)
+            || containsIgnoreCase(restaurant.getAddress().address(), needle)
+            || containsIgnoreCase(restaurant.getAddress().city(), needle)
+            || containsIgnoreCase(restaurant.getAddress().country(), needle);
+    }
+
+    private static boolean containsIgnoreCase(String value, String needle) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(needle);
     }
 }
