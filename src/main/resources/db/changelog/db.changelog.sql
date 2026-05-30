@@ -6,13 +6,18 @@ CREATE TABLE IF NOT EXISTS restaurant (
     updated_at TIMESTAMP NOT NULL,
     name VARCHAR(255) NOT NULL,
     phone_number VARCHAR(20) NOT NULL,
-    opening_hours JSONB NOT NULL,
+    opening_hours VARCHAR(255) NOT NULL,
     address VARCHAR(255) NOT NULL,
     city VARCHAR(255) NOT NULL,
     country VARCHAR(255) NOT NULL,
     longitude DOUBLE PRECISION NOT NULL,
     latitude DOUBLE PRECISION NOT NULL
 );
+
+--changeset edins:30_05_2026-3
+ALTER TABLE restaurant
+    ALTER COLUMN opening_hours TYPE JSONB
+    USING opening_hours::JSONB;
 
 --changeset edins:30_05_2026-2
 INSERT INTO restaurant (
