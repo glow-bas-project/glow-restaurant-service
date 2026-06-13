@@ -6,10 +6,15 @@ import com.glow.restaurant.application.api.model.FindRestaurantIdsResponse;
 import com.glow.restaurant.application.api.model.MaterialiseRestaurantsByIdsRequest;
 import com.glow.restaurant.application.model.RestaurantDto;
 import com.glow.restaurant.application.services.RestaurantService;
+import com.glow.restaurant.application.model.RestaurantOrderDto;
+import com.glow.restaurant.application.services.RestaurantOrderService;
+import com.glow.restaurant.application.api.model.NotifyRestaurantRequest;
+import com.glow.restaurant.application.api.model.UpdateOrderStatusRequest;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.jboss.resteasy.reactive.RestResponse;
 
+import java.util.UUID;
 import java.util.List;
 
 @Path("/restaurants")
@@ -18,9 +23,11 @@ import java.util.List;
 public class RestaurantController {
 
     private final RestaurantService service;
+    private final RestaurantOrderService restaurantOrderService;
 
-    public RestaurantController(RestaurantService service) {
+    public RestaurantController(RestaurantService service, RestaurantOrderService restaurantOrderService) {
         this.service = service;
+        this.restaurantOrderService = restaurantOrderService;
     }
 
     @GET
@@ -40,6 +47,12 @@ public class RestaurantController {
         return RestResponse.ok(service.findById(id));
     }
 
+    @GET
+    @Path("{id}/orders")
+    public RestResponse<List<RestaurantOrderDto>> getOrders(@PathParam("id") String restaurantId) {
+        return RestResponse.ok(restaurantOrderService.getOrdersForRestaurant(UUID.fromString(restaurantId)));
+    }
+
     @POST
     @Path("find")
     public RestResponse<FindRestaurantIdsResponse> findRestaurants(FindRestaurantIdsRequest request) {
@@ -55,6 +68,26 @@ public class RestaurantController {
     @Path("materialise")
     public RestResponse<List<RestaurantDto>> materialiseRestaurants(MaterialiseRestaurantsByIdsRequest request) {
         return RestResponse.ok(service.materialise(request.ids()));
+    }
+
+    @POST
+    @Path("{id}/orders")
+    public RestResponse<RestaurantOrderDto> notifyOrder(@PathParam("id") String restaurantId, NotifyRestaurantRequest request) {
+        var dto = restaurantOrderService.notifyOrder(UUID.fromString(restaurantId), request);
+        return RestResponse.status(RestResponse.Status.CREATED, dto);
+    }
+
+    @PATCH
+    @Path("{id}/orders/{orderId}/status")
+    public RestResponse<RestaurantOrderDto> updateOrderStatus(
+            @PathParam("id") String restaurantId,
+            @PathParam("orderId") String orderId,
+            UpdateOrderStatusRequest request) {
+        var dto = restaurantOrderService.updateOrderStatus(
+            UUID.fromString(restaurantId),
+            UUID.fromString(orderId),
+            request.status());
+        return RestResponse.ok(dto);
     }
 
     @DELETE
